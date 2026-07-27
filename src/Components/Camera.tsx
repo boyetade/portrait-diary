@@ -162,7 +162,7 @@ export default function Camera() {
           <img
             src={photoUrl}
             alt="Captured"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover scale-x-[-1]"
           />
         ) : (
           <>
@@ -171,7 +171,7 @@ export default function Camera() {
               autoPlay
               muted
               playsInline
-              className="h-full w-full object-cover"
+              className="h-full w-full scale-x-[-1] object-cover"
             />
 
             {phase === "countdown" && (
