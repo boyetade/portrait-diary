@@ -1,7 +1,9 @@
 import type { DiaryEntry } from "./diaryStorage";
 
-export type ArtefactView = "week" | "month";
+export type ArtefactView = "week" | "month" | "custom";
 export type ArtefactColorMode = "bw" | "color" | "tint";
+
+export const MAX_LAYER_IMAGES = 10;
 
 const MIN_OPACITY = 0.35;
 const MAX_OPACITY = 0.68;
@@ -61,6 +63,8 @@ export function filterEntriesByView(
         return isSameWeek(date, referenceDate);
       case "month":
         return isSameMonth(date, referenceDate);
+      case "custom":
+        return true;
     }
   });
 }
@@ -107,6 +111,8 @@ export function getViewLabel(view: ArtefactView, referenceDate: Date): string {
         month: "long",
         year: "numeric",
       });
+    case "custom":
+      return "Pick up to 10 portraits from your diary";
   }
 }
 
