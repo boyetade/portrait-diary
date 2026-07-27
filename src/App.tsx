@@ -1,6 +1,7 @@
 import { BrowserRouter, Link, Outlet, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Diary from "./pages/Diary";
+import Artefact from "./pages/Artefact";
 
 function AppLayout() {
   return (
@@ -20,6 +21,12 @@ function AppLayout() {
           >
             Your diary
           </Link>
+          <Link
+            to="/artefact"
+            className="text-sm font-medium text-gray-900 transition hover:text-gray-600"
+          >
+            Create artefact
+          </Link>
         </nav>
       </header>
       <Outlet />
@@ -34,6 +41,7 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/diary" element={<Diary />} />
+          <Route path="/artefact" element={<Artefact />} />
         </Route>
       </Routes>
     </BrowserRouter>

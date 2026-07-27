@@ -13,6 +13,18 @@ gsap.registerPlugin(ScrollTrigger);
 
 const END_PADDING_PX = 16;
 
+function getMonthKey(isoDate: string): string {
+  const date = new Date(isoDate);
+  return `${date.getFullYear()}-${date.getMonth()}`;
+}
+
+function getMonthLabel(isoDate: string): string {
+  return new Date(isoDate).toLocaleDateString(undefined, {
+    month: "long",
+    year: "numeric",
+  });
+}
+
 type DiaryEntryFigureProps = {
   entry: DiaryEntry;
   isExpanded: boolean;
@@ -113,6 +125,8 @@ function DiaryEntryFigure({
   return (
     <figure
       ref={figureRef}
+      data-month-key={getMonthKey(entry.createdAt)}
+      data-month-label={getMonthLabel(entry.createdAt)}
       onClick={() => onEntryClick(entry.id)}
       className="relative shrink-0 cursor-pointer overflow-visible"
     >
@@ -180,6 +194,8 @@ export default function Diary() {
   const panelRef = useRef<HTMLElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const racesRef = useRef<HTMLDivElement>(null);
+  const monthLabelRef = useRef<HTMLParagraphElement>(null);
+  const activeMonthKeyRef = useRef("");
 
   const handleClearEntries = () => {
     clearDiaryEntries();
@@ -212,7 +228,57 @@ export default function Diary() {
     const panel = panelRef.current;
     const scrollContainer = scrollContainerRef.current;
     const races = racesRef.current;
+    const monthLabel = monthLabelRef.current;
     if (!panel || !scrollContainer || !races) return;
+
+    const updateVisibleMonth = () => {
+      const labelEl = monthLabelRef.current;
+      if (!labelEl || !races) return;
+
+      const scrollOffset = Math.abs(gsap.getProperty(races, "x") as number);
+      const anchor = scrollOffset + 16;
+      const figures = races.querySelectorAll("figure[data-month-key]");
+
+      if (figures.length === 0) return;
+
+      let monthKey = figures[0].getAttribute("data-month-key") ?? "";
+      let monthText = figures[0].getAttribute("data-month-label") ?? "";
+
+      figures.forEach((figure) => {
+        const element = figure as HTMLElement;
+        if (element.offsetLeft <= anchor) {
+          monthKey = element.getAttribute("data-month-key") ?? monthKey;
+          monthText = element.getAttribute("data-month-label") ?? monthText;
+        }
+      });
+
+      if (monthKey === activeMonthKeyRef.current) return;
+
+      const animateMonthChange = (text: string, key: string) => {
+        activeMonthKeyRef.current = key;
+        labelEl.textContent = text;
+        gsap.fromTo(
+          labelEl,
+          { autoAlpha: 0, y: 8 },
+          { autoAlpha: 1, y: 0, duration: 0.25, ease: "power2.out" },
+        );
+      };
+
+      if (!activeMonthKeyRef.current) {
+        activeMonthKeyRef.current = monthKey;
+        labelEl.textContent = monthText;
+        gsap.set(labelEl, { autoAlpha: 1, y: 0 });
+        return;
+      }
+
+      gsap.to(labelEl, {
+        autoAlpha: 0,
+        y: -8,
+        duration: 0.15,
+        ease: "power2.in",
+        onComplete: () => animateMonthChange(monthText, monthKey),
+      });
+    };
 
     const ctx = gsap.context(() => {
       const getScrollDistance = () => {
@@ -249,9 +315,15 @@ export default function Diary() {
         animation: tween,
         scrub: 1,
         invalidateOnRefresh: true,
+        onUpdate: updateVisibleMonth,
       });
     }, panel);
 
+    activeMonthKeyRef.current = "";
+    if (monthLabel && entries[0]) {
+      monthLabel.textContent = getMonthLabel(entries[0].createdAt);
+    }
+    updateVisibleMonth();
     refreshScroll();
 
     const handleResize = () => {
@@ -285,7 +357,14 @@ export default function Diary() {
         <>
           <div className="flex items-center justify-between gap-4 px-4 py-4">
             <h2 className="text-2xl font-medium text-gray-900">Your diary</h2>
-            {showClearConfirm ? (
+            <div className="flex items-center gap-4">
+              <Link
+                to="/artefact"
+                className="text-sm font-medium text-gray-900 transition hover:text-gray-600"
+              >
+                Create artefact
+              </Link>
+              {showClearConfirm ? (
               <div className="flex items-center gap-3">
                 <p className="text-sm text-gray-600">Delete all entries?</p>
                 <button
@@ -316,30 +395,34 @@ export default function Diary() {
                 Clear all
               </button>
             )}
+            </div>
           </div>
 
           <section ref={panelRef} className="flex h-screen flex-col bg-gray-50">
-            <div
-              ref={scrollContainerRef}
-              className="flex flex-1 items-center overflow-hidden"
-            >
-              <div
-                ref={racesRef}
-                className="races flex w-max items-center gap-8 px-4"
-              >
-                {entries.map((entry) => (
-                  <DiaryEntryFigure
-                    key={entry.id}
-                    entry={entry}
-                    isExpanded={expandedEntryId === entry.id}
-                    pendingDeleteId={pendingDeleteId}
-                    onEntryClick={handleEntryClick}
-                    onDeleteClick={setPendingDeleteId}
-                    onConfirmDelete={handleDeleteEntry}
-                    onCancelDelete={() => setPendingDeleteId(null)}
-                    onImageLoad={refreshScroll}
-                  />
-                ))}
+            <div className="flex flex-1 flex-col justify-center overflow-hidden">
+              <p
+                ref={monthLabelRef}
+                className="mb-8 px-4 text-xl font-medium text-gray-900"
+              />
+              <div ref={scrollContainerRef} className="overflow-hidden">
+                <div
+                  ref={racesRef}
+                  className="races flex w-max items-center gap-8 px-4"
+                >
+                  {entries.map((entry) => (
+                    <DiaryEntryFigure
+                      key={entry.id}
+                      entry={entry}
+                      isExpanded={expandedEntryId === entry.id}
+                      pendingDeleteId={pendingDeleteId}
+                      onEntryClick={handleEntryClick}
+                      onDeleteClick={setPendingDeleteId}
+                      onConfirmDelete={handleDeleteEntry}
+                      onCancelDelete={() => setPendingDeleteId(null)}
+                      onImageLoad={refreshScroll}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </section>
