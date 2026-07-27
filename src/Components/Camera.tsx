@@ -11,6 +11,7 @@ export default function Camera() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const countdownTimerRef = useRef<number | null>(null);
+  const hasCapturedRef = useRef(false);
 
   const [phase, setPhase] = useState<CameraPhase>("preview");
   const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS);
@@ -86,6 +87,9 @@ export default function Camera() {
   }, [attachStream, stopStream]);
 
   const capturePhoto = useCallback(() => {
+    if (hasCapturedRef.current) return;
+    hasCapturedRef.current = true;
+
     const video = videoRef.current;
     if (!video) return;
 
@@ -115,19 +119,24 @@ export default function Camera() {
   const handleTakePhoto = () => {
     if (phase !== "preview" || error || isStarting) return;
 
+    hasCapturedRef.current = false;
     setPhase("countdown");
     setCountdown(COUNTDOWN_SECONDS);
     clearCountdownTimer();
 
+    let remaining = COUNTDOWN_SECONDS;
+
     countdownTimerRef.current = window.setInterval(() => {
-      setCountdown((current) => {
-        if (current <= 1) {
-          clearCountdownTimer();
-          capturePhoto();
-          return COUNTDOWN_SECONDS;
-        }
-        return current - 1;
-      });
+      remaining -= 1;
+
+      if (remaining <= 0) {
+        clearCountdownTimer();
+        capturePhoto();
+        setCountdown(COUNTDOWN_SECONDS);
+        return;
+      }
+
+      setCountdown(remaining);
     }, 1000);
   };
 

@@ -33,3 +33,18 @@ export function addDiaryEntry(imageDataUrl: string): DiaryEntry {
 
   return entry;
 }
+
+export function clearDiaryEntries(): void {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+export function deleteDiaryEntry(id: string): void {
+  const entries = getDiaryEntries().filter((entry) => entry.id !== id);
+
+  if (entries.length === 0) {
+    localStorage.removeItem(STORAGE_KEY);
+    return;
+  }
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
