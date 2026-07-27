@@ -1,15 +1,35 @@
-import Camera from './Components/Camera'
+import { BrowserRouter, Link, Outlet, Route, Routes } from "react-router-dom";
+import Home from "./pages/Home";
+import Diary from "./pages/Diary";
+
+function AppLayout() {
+  return (
+    <>
+      <header className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between px-4 py-4">
+        <h1 className="text-3xl font-medium text-gray-900">portrait-diary</h1>
+        <Link
+          to="/diary"
+          className="text-sm font-medium text-gray-900 transition hover:text-gray-600"
+        >
+          Your diary
+        </Link>
+      </header>
+      <Outlet />
+    </>
+  );
+}
 
 function App() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-10">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-gray-900">portrait-diary</h1>
-        <p className="mt-2 text-gray-600">Take a photo with a 3-second countdown</p>
-      </div>
-      <Camera />
-    </main>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/diary" element={<Diary />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
