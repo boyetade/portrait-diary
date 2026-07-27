@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  exportArtefactImage,
   filterEntriesByView,
   getLayerOffset,
   getLayerOpacity,
@@ -73,6 +74,7 @@ export default function Artefact() {
   const referenceDate = useMemo(() => new Date(), []);
   const [view, setView] = useState<ArtefactView>("month");
   const [colorMode, setColorMode] = useState<ArtefactColorMode>("tint");
+  const [isDownloading, setIsDownloading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() =>
     defaultSelectedIds(
       filterEntriesByView(allEntries, "month", referenceDate).map(
@@ -142,6 +144,37 @@ export default function Artefact() {
   const periodEntries = useMemo(
     () => sortEntriesOldestFirst(filteredEntries),
     [filteredEntries],
+  );
+
+  const handleDownload = async () => {
+    if (layeredEntries.length === 0 || isDownloading) return;
+
+    setIsDownloading(true);
+
+    try {
+      const blob = await exportArtefactImage(layeredEntries, colorMode);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `artefact-${view}.jpg`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.alert("Could not download artefact. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const downloadButton = (
+    <button
+      type="button"
+      onClick={() => void handleDownload()}
+      disabled={isDownloading}
+      className="mt-3 self-start text-sm font-medium text-black transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      {isDownloading ? "Preparing download…" : "Download"}
+    </button>
   );
 
   return (
@@ -251,8 +284,8 @@ export default function Artefact() {
                   </p>
                 ) : showPeriodColumn ? (
                   <div className="flex min-h-[calc(100svh-14rem)] items-center justify-center">
-                    <div className="flex flex-col items-center">
-                      <div className="flex items-center justify-center gap-8 sm:gap-10">
+                    <div className="flex items-center justify-center gap-8 sm:gap-10">
+                      <div className="flex flex-col">
                         <section
                           aria-label="Layered portrait artefact"
                           className="relative aspect-3/4 w-md shrink-0 overflow-hidden bg-white sm:w-lg"
@@ -283,8 +316,10 @@ export default function Artefact() {
                             );
                           })}
                         </section>
+                        {downloadButton}
+                      </div>
 
-                        <aside
+                      <aside
                           aria-label="Portraits in this period"
                           className="flex max-h-[calc(28rem*4/3)] w-16 shrink-0 flex-col py-4 sm:max-h-[calc(32rem*4/3)] sm:w-20 sm:py-6"
                         >
@@ -303,14 +338,13 @@ export default function Artefact() {
                             ))}
                           </div>
                         </aside>
-                      </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="mt-8">
+                  <div className="mx-auto mt-8 flex w-full max-w-sm flex-col">
                     <section
                       aria-label="Layered portrait artefact"
-                      className="relative mx-auto aspect-3/4 w-full max-w-sm overflow-hidden bg-white"
+                      className="relative aspect-3/4 w-full overflow-hidden bg-white"
                     >
                       {layeredEntries.map((entry, index) => {
                         const offset = getLayerOffset(index);
@@ -338,6 +372,7 @@ export default function Artefact() {
                         );
                       })}
                     </section>
+                    {downloadButton}
                   </div>
                 )}
               </>

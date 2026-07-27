@@ -124,3 +124,135 @@ export function getWeekStart(date: Date): Date {
   copy.setHours(0, 0, 0, 0);
   return copy;
 }
+
+const EXPORT_WIDTH = 900;
+const EXPORT_HEIGHT = 1200;
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Failed to load portrait image"));
+    image.src = src;
+  });
+}
+
+function drawCoverImage(
+  context: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  width: number,
+  height: number,
+  offsetX: number,
+  offsetY: number,
+): void {
+  const imageRatio = image.width / image.height;
+  const canvasRatio = width / height;
+
+  let drawWidth: number;
+  let drawHeight: number;
+  let drawX: number;
+  let drawY: number;
+
+  if (imageRatio > canvasRatio) {
+    drawHeight = height;
+    drawWidth = height * imageRatio;
+    drawX = (width - drawWidth) / 2 + offsetX;
+    drawY = offsetY;
+  } else {
+    drawWidth = width;
+    drawHeight = width / imageRatio;
+    drawX = offsetX;
+    drawY = (height - drawHeight) / 2 + offsetY;
+  }
+
+  context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+}
+
+function drawVignette(
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+): void {
+  const radius = Math.max(width, height);
+  const gradient = context.createRadialGradient(
+    width / 2,
+    height / 2,
+    radius * 0.4,
+    width / 2,
+    height / 2,
+    radius * 0.7,
+  );
+  gradient.addColorStop(0, "rgba(0, 0, 0, 0)");
+  gradient.addColorStop(1, "rgba(0, 0, 0, 0.08)");
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, width, height);
+}
+
+export async function exportArtefactImage(
+  entries: DiaryEntry[],
+  colorMode: ArtefactColorMode,
+): Promise<Blob> {
+  const canvas = document.createElement("canvas");
+  canvas.width = EXPORT_WIDTH;
+  canvas.height = EXPORT_HEIGHT;
+
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error("Could not create artefact image");
+  }
+
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, EXPORT_WIDTH, EXPORT_HEIGHT);
+
+  const layeredEntries = sortEntriesOldestFirst(entries);
+
+  for (let index = 0; index < layeredEntries.length; index++) {
+    const entry = layeredEntries[index];
+    const image = await loadImage(entry.imageDataUrl);
+    const opacity = getLayerOpacity(index, layeredEntries.length);
+    const offset = getLayerOffset(index);
+
+    context.save();
+    context.globalAlpha = opacity;
+
+    if (colorMode === "bw") {
+      context.filter = "grayscale(1) contrast(1.25) brightness(0.95)";
+    } else {
+      context.filter = "none";
+    }
+
+    drawCoverImage(
+      context,
+      image,
+      EXPORT_WIDTH,
+      EXPORT_HEIGHT,
+      offset.x,
+      offset.y,
+    );
+
+    if (colorMode === "bw") {
+      context.filter = "none";
+      drawVignette(context, EXPORT_WIDTH, EXPORT_HEIGHT);
+    }
+
+    if (colorMode === "tint") {
+      const tint = getTimeOfDayTint(entry.createdAt);
+      context.globalCompositeOperation = "color";
+      context.globalAlpha = opacity * tint.opacity;
+      context.fillStyle = tint.color;
+      context.fillRect(0, 0, EXPORT_WIDTH, EXPORT_HEIGHT);
+    }
+
+    context.restore();
+  }
+
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob(resolve, "image/jpeg", 0.92);
+  });
+
+  if (!blob) {
+    throw new Error("Could not export artefact image");
+  }
+
+  return blob;
+}
