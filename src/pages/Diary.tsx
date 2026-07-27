@@ -142,7 +142,7 @@ function DiaryEntryFigure({
         ref={captionRef}
         className="mt-2 flex w-24 items-center justify-between gap-2 text-xs sm:w-28 md:w-32"
       >
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-black">
           {new Date(entry.createdAt).toLocaleDateString(undefined, {
             month: "short",
             day: "numeric",
@@ -159,7 +159,7 @@ function DiaryEntryFigure({
               <button
                 type="button"
                 onClick={onCancelDelete}
-                className="text-xs font-medium text-gray-900 transition hover:text-gray-600"
+                className="text-xs font-medium text-black transition hover:opacity-70"
               >
                 Cancel
               </button>
@@ -342,13 +342,13 @@ export default function Diary() {
     <main className="bg-gray-50 pt-20">
       {entries.length === 0 ? (
         <div className="min-h-screen px-4 pb-10">
-          <h2 className="text-2xl font-medium text-gray-900">Your diary</h2>
-          <p className="mt-2 text-gray-600">
+          <h2 className="text-2xl font-medium text-black">Your diary</h2>
+          <p className="mt-2 text-black">
             Your captured portraits will appear here.
           </p>
           <Link
             to="/"
-            className="mt-6 inline-block text-sm font-medium text-gray-900 transition hover:text-gray-600"
+            className="mt-6 inline-block text-sm font-medium text-black transition hover:opacity-70"
           >
             Take a photo
           </Link>
@@ -356,21 +356,21 @@ export default function Diary() {
       ) : (
         <>
           <div className="flex items-center justify-between gap-4 px-4 py-4">
-            <h2 className="text-2xl font-medium text-gray-900">Your diary</h2>
+            <h2 className="text-2xl font-medium text-black">Your diary</h2>
             <div className="flex items-center gap-4">
               <Link
                 to="/artefact"
-                className="text-sm font-medium text-gray-900 transition hover:text-gray-600"
+                className="text-sm font-medium text-black transition hover:opacity-70"
               >
                 Create artefact
               </Link>
               {showClearConfirm ? (
               <div className="flex items-center gap-3">
-                <p className="text-sm text-gray-600">Delete all entries?</p>
+                <p className="text-sm text-black">Delete all entries?</p>
                 <button
                   type="button"
                   onClick={() => setShowClearConfirm(false)}
-                  className="text-sm font-medium text-gray-900 transition hover:text-gray-600"
+                  className="text-sm font-medium text-black transition hover:opacity-70"
                 >
                   Cancel
                 </button>
@@ -402,7 +402,7 @@ export default function Diary() {
             <div className="flex flex-1 flex-col justify-center overflow-hidden">
               <p
                 ref={monthLabelRef}
-                className="mb-8 px-4 text-xl font-medium text-gray-900"
+                className="mb-8 px-4 text-xl font-medium text-black"
               />
               <div ref={scrollContainerRef} className="overflow-hidden">
                 <div

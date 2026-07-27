@@ -7,23 +7,23 @@ function AppLayout() {
   return (
     <>
       <header className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between px-4 py-4">
-        <h1 className="text-3xl font-medium text-gray-900">portrait-diary</h1>
+        <h1 className="text-3xl font-medium text-black">portrait-diary</h1>
         <nav className="flex items-center gap-4">
           <Link
             to="/"
-            className="text-sm font-medium text-gray-900 transition hover:text-gray-600"
+            className="text-sm font-medium text-black transition hover:opacity-70"
           >
             Home
           </Link>
           <Link
             to="/diary"
-            className="text-sm font-medium text-gray-900 transition hover:text-gray-600"
+            className="text-sm font-medium text-black transition hover:opacity-70"
           >
             Your diary
           </Link>
           <Link
             to="/artefact"
-            className="text-sm font-medium text-gray-900 transition hover:text-gray-600"
+            className="text-sm font-medium text-black transition hover:opacity-70"
           >
             Create artefact
           </Link>

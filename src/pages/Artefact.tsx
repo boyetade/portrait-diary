@@ -28,8 +28,8 @@ const COLOR_MODE_OPTIONS: { value: ArtefactColorMode; label: string }[] = [
 
 function toggleClass(isActive: boolean): string {
   return isActive
-    ? "font-semibold text-black hover:text-gray-900"
-    : "font-medium text-gray-600 hover:text-black";
+    ? "font-semibold text-black"
+    : "font-medium text-black/60 hover:text-black";
 }
 
 function PortraitImage({
@@ -147,21 +147,19 @@ export default function Artefact() {
   return (
     <main className="min-h-screen bg-gray-50 px-4 pb-10 pt-20">
       <div className={`mx-auto ${showPeriodColumn ? "max-w-2xl" : "max-w-lg"}`}>
-        <h2 className="text-2xl font-medium text-gray-900">Visual artefact</h2>
-        <p className="mt-2 text-gray-600">
-          Portraits layered by time — newer entries appear lighter.
-        </p>
+        <h2 className="text-2xl font-medium text-black">Visual artefact</h2>
+        <p className="mt-2 text-black">Portraits layered by time</p>
 
         {allEntries.length === 0 ? (
           <div className="mt-8">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-black">
               Add portraits to your diary before creating an artefact.
             </p>
             <Link
               to="/"
-              className="mt-4 inline-block text-sm font-medium text-gray-900 transition hover:text-gray-600"
+              className="mt-4 inline-block text-sm font-medium text-black transition hover:opacity-70"
             >
-              Take a photo
+              Start your entries
             </Link>
           </div>
         ) : (
@@ -192,10 +190,14 @@ export default function Artefact() {
               ))}
             </div>
 
-            <p className="mt-4 text-sm text-gray-600">{periodLabel}</p>
+            <p
+              className={`mt-6 text-md text-black ${view === "month" || view === "week" ? "mb-4 sm:mb-6" : ""}`}
+            >
+              {periodLabel}
+            </p>
 
             {filteredEntries.length === 0 && !isCustomView ? (
-              <p className="mt-8 text-sm text-gray-600">
+              <p className="mt-8 text-sm text-black">
                 No portraits in this {view}. Try another view or add more
                 entries.
               </p>
@@ -204,10 +206,10 @@ export default function Artefact() {
                 {isCustomView && (
                   <div className="mt-6">
                     <div className="flex items-center justify-between gap-4">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-black">
                         Choose portraits
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-black">
                         {selectedIds.size} / {MAX_LAYER_IMAGES} selected
                       </p>
                     </div>
@@ -242,7 +244,7 @@ export default function Artefact() {
                 )}
 
                 {layeredEntries.length === 0 ? (
-                  <p className="mt-8 text-sm text-gray-600">
+                  <p className="mt-8 text-sm text-black">
                     {isCustomView
                       ? "Select at least one portrait to build your artefact."
                       : "No portraits available for this period."}
@@ -302,23 +304,6 @@ export default function Artefact() {
                           </div>
                         </aside>
                       </div>
-
-                      <p className="mt-4 text-center text-xs text-gray-500">
-                        {layeredEntries.length}{" "}
-                        {layeredEntries.length === 1 ? "portrait" : "portraits"}{" "}
-                        layered · oldest at{" "}
-                        {Math.round(
-                          getLayerOpacity(0, layeredEntries.length) * 100,
-                        )}
-                        % opacity · newest at{" "}
-                        {Math.round(
-                          getLayerOpacity(
-                            layeredEntries.length - 1,
-                            layeredEntries.length,
-                          ) * 100,
-                        )}
-                        %
-                      </p>
                     </div>
                   </div>
                 ) : (
@@ -353,23 +338,6 @@ export default function Artefact() {
                         );
                       })}
                     </section>
-
-                    <p className="mt-4 text-xs text-gray-500">
-                      {layeredEntries.length}{" "}
-                      {layeredEntries.length === 1 ? "portrait" : "portraits"}{" "}
-                      layered · oldest at{" "}
-                      {Math.round(
-                        getLayerOpacity(0, layeredEntries.length) * 100,
-                      )}
-                      % opacity · newest at{" "}
-                      {Math.round(
-                        getLayerOpacity(
-                          layeredEntries.length - 1,
-                          layeredEntries.length,
-                        ) * 100,
-                      )}
-                      %
-                    </p>
                   </div>
                 )}
               </>
@@ -377,7 +345,7 @@ export default function Artefact() {
 
             <Link
               to="/diary"
-              className="mt-8 inline-block text-sm font-medium text-gray-900 transition hover:text-gray-600"
+              className="mt-8 inline-block text-sm font-medium text-black transition hover:opacity-70"
             >
               Back to diary
             </Link>

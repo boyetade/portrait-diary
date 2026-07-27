@@ -211,7 +211,7 @@ export default function Camera() {
               <a
                 href={photoUrl}
                 download="photo.jpg"
-                className="flex-1 px-4 py-3 text-center text-sm font-semibold text-gray-900 "
+                className="flex-1 px-4 py-3 text-center text-sm font-semibold text-black"
               >
                 Download
               </a>
@@ -219,7 +219,7 @@ export default function Camera() {
             <button
               type="button"
               onClick={handleSeeEarlierEntries}
-              className="flex-1 px-4 py-3 text-center text-sm font-semibold text-gray-900 "
+              className="flex-1 px-4 py-3 text-center text-sm font-semibold text-black"
             >
               See your earlier entries
             </button>
@@ -229,7 +229,7 @@ export default function Camera() {
             type="button"
             onClick={handleTakePhoto}
             disabled={Boolean(error) || isStarting || phase === "countdown"}
-            className="flex-1 px-4 py-3 text-sm font-semibold text-black transition hover:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 px-4 py-3 text-sm font-semibold text-black transition hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {phase === "countdown" ? "Get ready…" : "Take photo"}
           </button>
