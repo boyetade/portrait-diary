@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { clearDiaryEntries, deleteDiaryEntry, getDiaryEntries } from "../lib/diaryStorage";
+import {
+  clearDiaryEntries,
+  deleteDiaryEntry,
+  getDiaryEntries,
+} from "../lib/diaryStorage";
 
 export default function Diary() {
   const [entries, setEntries] = useState(getDiaryEntries);
@@ -70,54 +74,56 @@ export default function Diary() {
           </Link>
         </>
       ) : (
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {entries.map((entry) => (
-            <figure key={entry.id}>
-              <img
-                src={entry.imageDataUrl}
-                alt="Diary portrait"
-                className="aspect-3/4 w-full bg-gray-200 object-cover"
-              />
-              <figcaption className="mt-2 flex items-center justify-between gap-2">
-                <p className="text-xs text-gray-500">
-                  {new Date(entry.createdAt).toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </p>
-                {pendingDeleteId === entry.id ? (
-                  <div className="flex items-center gap-2">
+        <div className="flex flex-1 items-center justify-center px-4">
+          <div className="flex max-w-full flex-nowrap justify-center gap-6 overflow-x-auto">
+            {entries.map((entry) => (
+              <figure key={entry.id} className="w-50 shrink-0">
+                <img
+                  src={entry.imageDataUrl}
+                  alt="Diary portrait"
+                  className="aspect-3/4 w-full bg-gray-200 object-cover"
+                />
+                <figcaption className="mt-2 flex items-center justify-between gap-2">
+                  <p className="text-xs text-gray-500">
+                    {new Date(entry.createdAt).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                  {pendingDeleteId === entry.id ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setPendingDeleteId(null)}
+                        className="text-xs font-medium text-gray-900 transition hover:text-gray-600"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteEntry(entry.id)}
+                        className="text-xs font-medium text-red-600 transition hover:text-red-500"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ) : (
                     <button
                       type="button"
-                      onClick={() => setPendingDeleteId(null)}
-                      className="text-xs font-medium text-gray-900 transition hover:text-gray-600"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteEntry(entry.id)}
+                      onClick={() => {
+                        setShowClearConfirm(false);
+                        setPendingDeleteId(entry.id);
+                      }}
                       className="text-xs font-medium text-red-600 transition hover:text-red-500"
                     >
                       Delete
                     </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowClearConfirm(false);
-                      setPendingDeleteId(entry.id);
-                    }}
-                    className="text-xs font-medium text-red-600 transition hover:text-red-500"
-                  >
-                    Delete
-                  </button>
-                )}
-              </figcaption>
-            </figure>
-          ))}
+                  )}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
       )}
     </main>
