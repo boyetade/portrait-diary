@@ -4,9 +4,11 @@ import {
   filterEntriesByView,
   getLayerOffset,
   getLayerOpacity,
+  getTimeOfDayTint,
   getViewLabel,
   getWeekStart,
   sortEntriesOldestFirst,
+  type ArtefactColorMode,
   type ArtefactView,
 } from "../lib/artefactUtils";
 import { getDiaryEntries } from "../lib/diaryStorage";
@@ -16,9 +18,22 @@ const VIEW_OPTIONS: { value: ArtefactView; label: string }[] = [
   { value: "month", label: "Month" },
 ];
 
+const COLOR_MODE_OPTIONS: { value: ArtefactColorMode; label: string }[] = [
+  { value: "bw", label: "Black & white" },
+  { value: "color", label: "Original color" },
+  { value: "tint", label: "Color tints" },
+];
+
+function toggleClass(isActive: boolean): string {
+  return isActive
+    ? "bg-gray-900 text-white"
+    : "bg-white text-gray-900 ring-1 ring-gray-200 hover:bg-gray-100";
+}
+
 export default function Artefact() {
   const allEntries = getDiaryEntries();
   const [view, setView] = useState<ArtefactView>("month");
+  const [colorMode, setColorMode] = useState<ArtefactColorMode>("tint");
   const referenceDate = useMemo(() => new Date(), []);
 
   const filteredEntries = useMemo(
@@ -60,17 +75,26 @@ export default function Artefact() {
           </div>
         ) : (
           <div className="mt-8">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {VIEW_OPTIONS.map((option) => (
                 <button
                   key={option.value}
                   type="button"
                   onClick={() => setView(option.value)}
-                  className={`px-3 py-1.5 text-sm font-medium transition ${
-                    view === option.value
-                      ? "bg-gray-900 text-white"
-                      : "bg-white text-gray-900 ring-1 ring-gray-200 hover:bg-gray-100"
-                  }`}
+                  className={`px-3 py-1.5 text-sm font-medium transition ${toggleClass(view === option.value)}`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              {COLOR_MODE_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setColorMode(option.value)}
+                  className={`px-3 py-1.5 text-sm font-medium transition ${toggleClass(colorMode === option.value)}`}
                 >
                   {option.label}
                 </button>
@@ -92,19 +116,34 @@ export default function Artefact() {
                 {layeredEntries.map((entry, index) => {
                   const offset = getLayerOffset(index);
                   const opacity = getLayerOpacity(index, layeredEntries.length);
+                  const tint = getTimeOfDayTint(entry.createdAt);
+                  const showTint = colorMode === "tint";
 
                   return (
-                    <img
+                    <div
                       key={entry.id}
-                      src={entry.imageDataUrl}
-                      alt=""
-                      className="absolute inset-0 h-full w-full object-cover grayscale"
+                      className="absolute inset-0"
                       style={{
                         opacity,
                         zIndex: index,
                         transform: `translate(${offset.x}px, ${offset.y}px)`,
                       }}
-                    />
+                    >
+                      <img
+                        src={entry.imageDataUrl}
+                        alt=""
+                        className={`h-full w-full object-cover ${colorMode === "bw" ? "grayscale" : ""}`}
+                      />
+                      {showTint && (
+                        <div
+                          className="pointer-events-none absolute inset-0 mix-blend-color"
+                          style={{
+                            backgroundColor: tint.color,
+                            opacity: tint.opacity,
+                          }}
+                        />
+                      )}
+                    </div>
                   );
                 })}
               </section>

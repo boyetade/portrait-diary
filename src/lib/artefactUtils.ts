@@ -1,6 +1,7 @@
 import type { DiaryEntry } from "./diaryStorage";
 
 export type ArtefactView = "week" | "month";
+export type ArtefactColorMode = "bw" | "color" | "tint";
 
 const MIN_OPACITY = 0.35;
 const MAX_OPACITY = 0.68;
@@ -22,6 +23,29 @@ function isSameMonth(a: Date, b: Date): boolean {
   return (
     a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth()
   );
+}
+
+export type TimeOfDayTint = {
+  color: string;
+  opacity: number;
+};
+
+export function getTimeOfDayTint(isoDate: string): TimeOfDayTint {
+  const hour = new Date(isoDate).getHours();
+
+  if (hour >= 5 && hour < 8) {
+    return { color: "#c4b5fd", opacity: 0.4 };
+  }
+  if (hour >= 8 && hour < 12) {
+    return { color: "#fcd34d", opacity: 0.35 };
+  }
+  if (hour >= 12 && hour < 17) {
+    return { color: "#fef08a", opacity: 0.25 };
+  }
+  if (hour >= 17 && hour < 21) {
+    return { color: "#fb923c", opacity: 0.4 };
+  }
+  return { color: "#60a5fa", opacity: 0.45 };
 }
 
 export function filterEntriesByView(
