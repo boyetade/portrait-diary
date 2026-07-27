@@ -7,3 +7,20 @@
 body {
   font-family: var(--font-sans);
 }
+
+.photo {
+  filter: grayscale(1) contrast(1.25) brightness(0.95);
+  position: relative;
+}
+
+.photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    transparent 40%,
+    rgba(2, 2, 2, 0.08) 100%
+  );
+  pointer-events: none;
+}

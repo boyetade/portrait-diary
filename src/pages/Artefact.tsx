@@ -28,8 +28,8 @@ const COLOR_MODE_OPTIONS: { value: ArtefactColorMode; label: string }[] = [
 
 function toggleClass(isActive: boolean): string {
   return isActive
-    ? "bg-gray-900 text-white"
-    : "bg-white text-gray-900 ring-1 ring-gray-200 hover:bg-gray-100";
+    ? "font-semibold text-black hover:text-gray-900"
+    : "font-medium text-gray-600 hover:text-black";
 }
 
 function defaultSelectedIds(entryIds: string[]): Set<string> {
@@ -62,7 +62,7 @@ export default function Artefact() {
       return sortEntriesOldestFirst(selected);
     }
 
-    return sortEntriesOldestFirst(filteredEntries.slice(0, MAX_LAYER_IMAGES));
+    return sortEntriesOldestFirst(filteredEntries);
   }, [allEntries, filteredEntries, isCustomView, selectedIds]);
 
   const periodLabel = useMemo(() => {
@@ -80,7 +80,11 @@ export default function Artefact() {
       return;
     }
 
-    const nextEntries = filterEntriesByView(allEntries, nextView, referenceDate);
+    const nextEntries = filterEntriesByView(
+      allEntries,
+      nextView,
+      referenceDate,
+    );
     setSelectedIds(defaultSelectedIds(nextEntries.map((entry) => entry.id)));
   };
 
@@ -130,7 +134,7 @@ export default function Artefact() {
                   key={option.value}
                   type="button"
                   onClick={() => handleViewChange(option.value)}
-                  className={`px-3 py-1.5 text-sm font-medium transition ${toggleClass(view === option.value)}`}
+                  className={`px-3 py-1.5 text-sm font-medium ${toggleClass(view === option.value)}`}
                 >
                   {option.label}
                 </button>
@@ -229,17 +233,22 @@ export default function Artefact() {
                             transform: `translate(${offset.x}px, ${offset.y}px)`,
                           }}
                         >
-                          <img
-                            src={entry.imageDataUrl}
-                            alt=""
-                            className={`h-full w-full object-cover ${colorMode === "bw" ? "grayscale" : ""}`}
-                          />
+                          <div
+                            className={`h-full w-full ${colorMode === "bw" ? "photo" : ""}`}
+                          >
+                            <img
+                              src={entry.imageDataUrl}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
                           {showTint && (
                             <div
                               className="pointer-events-none absolute inset-0 mix-blend-color"
                               style={{
                                 backgroundColor: tint.color,
                                 opacity: tint.opacity,
+                                filter: `brightness(${tint.brightness})`,
                               }}
                             />
                           )}
@@ -254,7 +263,9 @@ export default function Artefact() {
                     {layeredEntries.length}{" "}
                     {layeredEntries.length === 1 ? "portrait" : "portraits"}{" "}
                     layered · oldest at{" "}
-                    {Math.round(getLayerOpacity(0, layeredEntries.length) * 100)}
+                    {Math.round(
+                      getLayerOpacity(0, layeredEntries.length) * 100,
+                    )}
                     % opacity · newest at{" "}
                     {Math.round(
                       getLayerOpacity(

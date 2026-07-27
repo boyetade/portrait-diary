@@ -36,18 +36,18 @@ export function getTimeOfDayTint(isoDate: string): TimeOfDayTint {
   const hour = new Date(isoDate).getHours();
 
   if (hour >= 5 && hour < 8) {
-    return { color: "#c4b5fd", opacity: 0.4 };
+    return { color: "#c4b5fd", opacity: 1 };
   }
   if (hour >= 8 && hour < 12) {
-    return { color: "#fcd34d", opacity: 0.35 };
+    return { color: "#fcd34d", opacity: 1 };
   }
   if (hour >= 12 && hour < 17) {
-    return { color: "#fef08a", opacity: 0.25 };
+    return { color: "#fef08a", opacity: 1 };
   }
   if (hour >= 17 && hour < 21) {
-    return { color: "#fb923c", opacity: 0.4 };
+    return { color: "#fb923c", opacity: 1 };
   }
-  return { color: "#60a5fa", opacity: 0.45 };
+  return { color: "#60a5fa", opacity: 1 };
 }
 
 export function filterEntriesByView(
