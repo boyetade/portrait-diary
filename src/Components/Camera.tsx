@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { addDiaryEntry } from "../lib/diaryStorage";
 
 type CameraPhase = "preview" | "countdown" | "captured";
 
@@ -84,14 +85,6 @@ export default function Camera() {
     };
   }, [attachStream, stopStream]);
 
-  useEffect(() => {
-    return () => {
-      if (photoUrl) {
-        URL.revokeObjectURL(photoUrl);
-      }
-    };
-  }, [photoUrl]);
-
   const capturePhoto = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -105,20 +98,11 @@ export default function Camera() {
 
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return;
-
-        setPhotoUrl((previous) => {
-          if (previous) URL.revokeObjectURL(previous);
-          return URL.createObjectURL(blob);
-        });
-        setPhase("captured");
-        stopStream();
-      },
-      "image/jpeg",
-      0.92,
-    );
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+    addDiaryEntry(dataUrl);
+    setPhotoUrl(dataUrl);
+    setPhase("captured");
+    stopStream();
   }, [stopStream]);
 
   const clearCountdownTimer = () => {
